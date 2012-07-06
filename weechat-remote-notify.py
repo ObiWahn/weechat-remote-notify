@@ -52,6 +52,8 @@ import socket
 import subprocess
 import shlex
 
+from pprint import pprint as pprint
+
 SCRIPT_NAME    = "pyrnotify"
 SCRIPT_AUTHOR  = "Krister Svanlund <krister.svanlund@gmail.com>"
 SCRIPT_VERSION = "0.6"
@@ -121,6 +123,7 @@ def accept_connections(s):
         try:
             urgency, icon, time, title, body = data.split('\n')
             args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
+            #pprint(args)
             subprocess.Popen(args)
 
             sound="/usr/share/sounds/purple/receive.wav"
