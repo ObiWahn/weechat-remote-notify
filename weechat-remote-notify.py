@@ -58,13 +58,16 @@ SCRIPT_VERSION = "0.6"
 SCRIPT_LICENSE = "GPL3"
 SCRIPT_DESC    = "Send remote notifications over SSH"
 
-def run_notify(icon, nick,chan,message):
+def run_notify(urgency,icon,time,nick,chan,message):
     host = w.config_get_plugin('host')
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host, int(w.config_get_plugin('port'))))
-        data="%(urgency)s %(icon)s '%(nick)s to %(chan)s' '%(message)s'" % \
-            {'urgency':"normal", 'icon':str(icon), 'nick':str(nick), 'chan':str(chan),'message':str(message)}
+        data  = str(urgency) + "\n"
+        data += str(icon) + "\n"
+        data += str(time) + "\n"    #time to display TODO
+        data += str(nick) + " to " + str(chan) + "\n"
+        data += str(message)
         s.send(str(data))
         s.close()
     except Exception as e:
@@ -78,8 +81,9 @@ def on_msg(*a):
                 icon = w.config_get_plugin('pm-icon')
             else:
                 icon = w.config_get_plugin('icon')
+
             buffer = "me" if data == "private" else w.buffer_get_string(buffer, "short_name")
-            run_notify(icon, sender, buffer, message)
+            run_notify("normal",icon,"10000", sender, buffer, message)
             #w.prnt("", str(a))
     return w.WEECHAT_RC_OK
 
@@ -118,8 +122,7 @@ def accept_connections(s):
         conn.close()
     if data:
         try:
-            urgency, icon, title, body = shlex.split(data)
-            time="10000"
+            urgency, icon, time, title, body = data.split('\n')
             sound="/usr/share/sounds/purple/receive.wav"
             subprocess.call(["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body])
             subprocess.call(["play", "-V0", "-q", sound])
