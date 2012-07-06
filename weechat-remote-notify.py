@@ -102,9 +102,6 @@ def weechat_script():
 
 
 
-
-
-
 ######################################
 ## This is where the client starts, except for the global if-check nothing below this line is
 ## supposed to be executed in weechat, instead it runs when the script is executed from
@@ -123,8 +120,10 @@ def accept_connections(s):
     if data:
         try:
             urgency, icon, time, title, body = data.split('\n')
+            args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
+            subprocess.Popen(args)
+
             sound="/usr/share/sounds/purple/receive.wav"
-            subprocess.call(["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body])
             subprocess.call(["play", "-V0", "-q", sound])
         except ValueError as e:
             print e
