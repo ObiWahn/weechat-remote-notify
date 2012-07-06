@@ -63,7 +63,9 @@ def run_notify(icon, nick,chan,message):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host, int(w.config_get_plugin('port'))))
-        s.send("normal %s \"%s to %s\" \"%s\"" % (icon, nick, chan, message))
+        data="%(urgency)s %(icon)s '%(nick)s to %(chan)s' '%(message)s'" % \
+            {'urgency':"normal", 'icon':str(icon), 'nick':str(nick), 'chan':str(chan),'message':str(message)}
+        s.send(str(data))
         s.close()
     except Exception as e:
         w.prnt("", "Could not send notification: %s" % str(e))
