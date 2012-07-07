@@ -81,7 +81,8 @@ def on_msg(*a):
     if len(a) == 8:
         data, buffer, timestamp, tags, displayed, highlight, sender, message = a
         #return when sender is weechat.look.prefix_network
-        if sender == "↔":
+        option = w.config_get("weechat.look.prefix_network")
+        if sender == w.config_string(option):
             return w.WEECHAT_RC_OK
         if data == "private" or highlight == "1":
             if data == "private" and w.config_get_plugin('pm-icon'):
