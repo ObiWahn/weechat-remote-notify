@@ -81,6 +81,9 @@ def run_notify(urgency,icon,time,nick,chan,message):
 def on_msg(*a):
     if len(a) == 8:
         data, buffer, timestamp, tags, displayed, highlight, sender, message = a
+        #return when sender is weechat.look.prefix_network
+        if sender == "↔":
+            return w.WEECHAT_RC_OK
         if data == "private" or highlight == "1":
             if data == "private" and w.config_get_plugin('pm-icon'):
                 icon = w.config_get_plugin('pm-icon')
