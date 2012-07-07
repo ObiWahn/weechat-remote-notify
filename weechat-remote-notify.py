@@ -36,7 +36,7 @@
 #		/python load pyrnotify.py
 #		and set the port
 #		/set plugins.var.python.pyrnotify.port 4321
-#13157
+#
 # It is also possible to set which host pyrnotify shall connect to,
 # this is not recommended. Using a ssh port-forward is much safer
 # and doesn't require any ports but ssh to be open.
@@ -73,7 +73,10 @@ def run_notify(urgency,icon,time,nick,chan,message):
         s.send(str(data))
         s.close()
     except Exception as e:
-        w.prnt("", "Could not send notification: %s" % str(e))
+        pass
+        #TODO make error message optional - as ppl do not always connect from x
+        #and it spams the logs quite a bit
+        #w.prnt("", "Could not send notification: %s" % str(e))
 
 def on_msg(*a):
     if len(a) == 8:
