@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#
 # -*- coding: utf-8 -*-
 # ex:sw=4 ts=4:ai:
 #
