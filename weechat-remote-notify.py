@@ -79,18 +79,26 @@ def run_notify(urgency,icon,time,nick,chan,message):
 def on_msg(*a):
     if len(a) == 8:
         data, buffer, timestamp, tags, displayed, highlight, sender, message = a
+        time=10000
         #return when sender is weechat.look.prefix_network
         option = w.config_get("weechat.look.prefix_network")
         if sender == w.config_string(option):
             return w.WEECHAT_RC_OK
         if data == "private" or highlight == "1":
+            #set icon
             if data == "private" and w.config_get_plugin('pm-icon'):
                 icon = w.config_get_plugin('pm-icon')
             else:
                 icon = w.config_get_plugin('icon')
 
+            #set buffer
             buffer = "me" if data == "private" else w.buffer_get_string(buffer, "short_name")
-            run_notify("normal",icon,"10000", sender, buffer, message)
+
+            #set time - displays message forever on highlight
+            time = 0 if highlight
+
+            #sent
+            run_notify("normal",icon,str(time), sender, buffer, message)
             #w.prnt("", str(a))
     return w.WEECHAT_RC_OK
 
@@ -103,8 +111,8 @@ def weechat_script():
         for (kw, v) in settings.items():
             if not w.config_get_plugin(kw):
                 w.config_set_plugin(kw, v)
-        w.hook_print("", "notify_message", "", 1, "on_msg", "")
-        w.hook_print("", "notify_private", "", 1, "on_msg", "private")
+        w.hook_print("", "notify_message",   "", 1, "on_msg", "")
+        w.hook_print("", "notify_private",   "", 1, "on_msg", "private")
         w.hook_print("", "notify_highlight", "", 1, "on_msg", "") # Not sure if this is needed
 
 
