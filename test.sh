@@ -5,7 +5,7 @@ request()
     printf '%b' \
         "normal\n" \
         "utilities-terminal\n" \
-        "60\n" \
+        "$(( 1000 * 10 ))\n" \
         "nick\n" \
         "#chan\n" \
         "this is just a test"

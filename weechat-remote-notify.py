@@ -79,7 +79,6 @@ def run_notify(urgency,icon,time,nick,chan,message):
 def on_msg(*a):
     if len(a) == 8:
         data, buffer, timestamp, tags, displayed, highlight, sender, message = a
-        time=10000
         #return when sender is weechat.look.prefix_network
         option = w.config_get("weechat.look.prefix_network")
         if sender == w.config_string(option):
@@ -95,7 +94,7 @@ def on_msg(*a):
             buffer = "me" if data == "private" else w.buffer_get_string(buffer, "short_name")
 
             #set time - displays message forever on highlight
-            time = 0 if highlight
+            time = 0 if highlight == "1" else 10000
 
             #sent
             run_notify("normal",icon,str(time), sender, buffer, message)
