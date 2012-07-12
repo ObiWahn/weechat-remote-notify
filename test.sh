@@ -6,7 +6,8 @@ request()
         "normal\n" \
         "utilities-terminal\n" \
         "60\n" \
-        "test\n" \
+        "nick\n" \
+        "#chan\n" \
         "this is just a test"
 }
 

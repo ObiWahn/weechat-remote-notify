@@ -65,7 +65,8 @@ def run_notify(urgency,icon,time,nick,chan,message):
         data  = str(urgency) + "\n"
         data += str(icon) + "\n"
         data += str(time) + "\n"    #time to display TODO
-        data += str(nick) + " to " + str(chan) + "\n"
+        data += str(nick) + "\n"
+        data += str(chan) + "\n"
         data += str(message)
         s.send(str(data))
         s.close()
@@ -119,13 +120,14 @@ def accept_connections(s):
         data = ""
         d = conn.recv(1024)
         while d:
-            data += d 
+            data += d
             d = conn.recv(1024)
     finally:
         conn.close()
     if data:
         try:
-            urgency, icon, time, title, body = data.split('\n')
+            urgency, icon, time, nick, chan, body = data.split('\n')
+            title = nick + " to " + chan
             args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
             #pprint(args)
             subprocess.Popen(args)
