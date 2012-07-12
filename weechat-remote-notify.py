@@ -2,10 +2,8 @@
 # -*- coding: utf-8 -*-
 # ex:sw=4 ts=4:ai:
 #
-# Copyright (c) 2012 by Krister Svanlund <krister.svanlund@gmail.com>
-#   based on tcl version:
-#    Remote Notification Script v1.1
-#    by Gotisch <gotisch@gmail.com>
+# Copyright (c) 2012 by Jan Christop Uhde <linux@obiwahn.org>
+#   based on: pyrnotify by Krister Svanlund <krister.svanlund@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,17 +22,17 @@
 # Example usage when Weechat is running on a remote PC and you want
 # want to use port 4321 for the connection.
 #
-#     On the "client" (where the notifications will end up), host is
-#     the remote host where weechat is running:
-#		python2 location/of/pyrnotify.py 4321 & ssh -R 4321:localhost:4321 username@host
-#     Important to remember is that you should probably setup the
-#     connection with public key encryption and use something like
-#     autossh to do this in the background.
+#   On the "client" (where the notifications will end up), host is
+#   the remote host where weechat is running:
+#       python2 location/of/pyrnotify.py 4321 & ssh -R 4321:localhost:4321 username@host
+#   Important to remember is that you should probably setup the
+#   connection with public key encryption and use something like
+#   autossh to do this in the background.
 #
-#     In weechat:
-#		/python load pyrnotify.py
-#		and set the port
-#		/set plugins.var.python.pyrnotify.port 4321
+#   In weechat:
+#   /python load remote-notify.py
+#   and set the port
+#   /set plugins.var.python.remote-notify.port 4321
 #
 # It is also possible to set which host pyrnotify shall connect to,
 # this is not recommended. Using a ssh port-forward is much safer
@@ -53,9 +51,9 @@ import shlex
 
 from pprint import pprint as pprint
 
-SCRIPT_NAME    = "pyrnotify"
-SCRIPT_AUTHOR  = "Krister Svanlund <krister.svanlund@gmail.com>"
-SCRIPT_VERSION = "0.6"
+SCRIPT_NAME    = "remote-notify"
+SCRIPT_AUTHOR  = "Jan Christoph Uhde <linux@obiwahn.org>"
+SCRIPT_VERSION = "0.1"
 SCRIPT_LICENSE = "GPL3"
 SCRIPT_DESC    = "Send remote notifications over SSH"
 
