@@ -55,7 +55,7 @@ SCRIPT_NAME    = "remote-notify"
 SCRIPT_AUTHOR  = "Jan Christoph Uhde <linux@obiwahn.org>"
 SCRIPT_VERSION = "0.1"
 SCRIPT_LICENSE = "GPL3"
-SCRIPT_DESC    = "Send remote notifications over SSH"
+SCRIPT_DESC    = "Send remote notifications over sockets"
 
 def run_notify(urgency,icon,time,nick,chan,message):
     host = w.config_get_plugin('host')
@@ -85,7 +85,7 @@ def on_msg(*a):
             return w.WEECHAT_RC_OK
         if data == "private" or highlight == "1":
             #set icon
-            if data == "private" and w.config_get_plugin('pm-icon'):
+            if data == "private":
                 icon = w.config_get_plugin('pm-icon')
             else:
                 icon = w.config_get_plugin('icon')
@@ -94,10 +94,15 @@ def on_msg(*a):
             buffer = "me" if data == "private" else w.buffer_get_string(buffer, "short_name")
 
             #set time - displays message forever on highlight
-            time = 0 if highlight == "1" else 10000
+            if highlight == "1":
+                time = w.config_get_plugin('highlight_display_time')
+            else:
+                time = w.config_get_plugin('default_display_time')
+
+            urgency = w.config_get_plugin('default_urgency')
 
             #sent
-            run_notify("normal",icon,str(time), sender, buffer, message)
+            run_notify(urgency, icon, time, sender, buffer, message)
             #w.prnt("", str(a))
     return w.WEECHAT_RC_OK
 
@@ -105,7 +110,11 @@ def weechat_script():
     settings = {'host' : "localhost",
                 'port' : "4321",
                 'icon' : "utilities-terminal",
-                'pm-icon' : "emblem-favorite"}
+                'pm-icon' : "emblem-favorite",
+                'default_urgency' : 'normal',
+                'default_display_time' : '10000',
+                'highlight_display_time' : '30000' }
+
     if w.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, "", ""):
         for (kw, v) in settings.items():
             if not w.config_get_plugin(kw):
