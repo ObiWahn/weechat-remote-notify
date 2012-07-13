@@ -57,12 +57,13 @@ SCRIPT_VERSION = "0.1"
 SCRIPT_LICENSE = "GPL3"
 SCRIPT_DESC    = "Send remote notifications over sockets"
 
-def run_notify(urgency,icon,time,nick,chan,message):
+def run_notify(mtype,urgency,icon,time,nick,chan,message):
     host = w.config_get_plugin('host')
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host, int(w.config_get_plugin('port'))))
-        data  = str(urgency) + "\n"
+        data  = str(mtype) + "\n"
+        data += str(urgency) + "\n"
         data += str(icon) + "\n"
         data += str(time) + "\n"    #time to display TODO
         data += str(nick) + "\n"
@@ -84,25 +85,28 @@ def on_msg(*a):
         if sender == w.config_string(option):
             return w.WEECHAT_RC_OK
         if data == "private" or highlight == "1":
-            #set icon
-            if data == "private":
-                icon = w.config_get_plugin('pm-icon')
-            else:
-                icon = w.config_get_plugin('icon')
 
             #set buffer
             buffer = "me" if data == "private" else w.buffer_get_string(buffer, "short_name")
 
             #set time - displays message forever on highlight
-            if highlight == "1":
+            if highlight == "1" and data == "private":
+                mtype = "private_highlight"
+                icon = w.config_get_plugin('pm-icon')
+                time = w.config_get_plugin('display_time_private_highlight')
+            elif highlight == "1":
+                mtype = "highlight"
+                icon = w.config_get_plugin('icon')
                 time = w.config_get_plugin('display_time_highlight')
             else:
+                mtype = "private"
+                icon = w.config_get_plugin('pm-icon')
                 time = w.config_get_plugin('display_time_default')
 
             urgency = w.config_get_plugin('urgency_default')
 
             #sent
-            run_notify(urgency, icon, time, sender, buffer, message)
+            run_notify(mtype, urgency, icon, time, sender, buffer, message)
             #w.prnt("", str(a))
     return w.WEECHAT_RC_OK
 
@@ -142,7 +146,7 @@ def accept_connections(s):
         conn.close()
     if data:
         try:
-            urgency, icon, time, nick, chan, body = data.split('\n')
+            mtype, urgency, icon, time, nick, chan, body = data.split('\n')
             title = nick + " to " + chan
             args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
             #pprint(args)
