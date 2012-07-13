@@ -117,7 +117,8 @@ def weechat_script():
                 'pm-icon' : "emblem-favorite",
                 'urgency_default' : 'normal',
                 'display_time_default' : '10000',
-                'display_time_highlight' : '30000' }
+                'display_time_highlight' : '30000',
+                'display_time_private_highlight' : '0'}
 
     if w.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, "", ""):
         for (kw, v) in settings.items():
