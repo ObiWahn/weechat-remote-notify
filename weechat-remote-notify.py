@@ -95,11 +95,11 @@ def on_msg(*a):
 
             #set time - displays message forever on highlight
             if highlight == "1":
-                time = w.config_get_plugin('highlight_display_time')
+                time = w.config_get_plugin('display_time_highlight')
             else:
-                time = w.config_get_plugin('default_display_time')
+                time = w.config_get_plugin('display_time_default')
 
-            urgency = w.config_get_plugin('default_urgency')
+            urgency = w.config_get_plugin('urgency_default')
 
             #sent
             run_notify(urgency, icon, time, sender, buffer, message)
