@@ -111,9 +111,9 @@ def weechat_script():
                 'port' : "4321",
                 'icon' : "utilities-terminal",
                 'pm-icon' : "emblem-favorite",
-                'default_urgency' : 'normal',
-                'default_display_time' : '10000',
-                'highlight_display_time' : '30000' }
+                'urgency_default' : 'normal',
+                'display_time_default' : '10000',
+                'display_time_highlight' : '30000' }
 
     if w.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, "", ""):
         for (kw, v) in settings.items():
