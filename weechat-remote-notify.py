@@ -100,10 +100,9 @@ def run_notify(mtype,urgency,icon,time,nick,chan,message):
             s.send(str(data))
             s.close()
     except Exception as e:
-        pass
-        #TODO make error message optional - as ppl do not always connect from x
-        #and it spams the logs quite a bit
-        #w.prnt("", "Could not send notification: %s" % str(e))
+        if w.config_string_to_boolean(w.config_get_plugin("display_errors")):
+            w.prnt("", "Could not send notification: %s" % str(e))
+            w.prnt("", "To hide errors, run: /set plugins.var.python.remote-notify.display_errors off")
 
 def on_msg(*a):
     if len(a) == 8:
@@ -147,7 +146,8 @@ def weechat_script():
                 'urgency_default' : 'normal',
                 'display_time_default' : '10000',
                 'display_time_highlight' : '30000',
-                'display_time_private_highlight' : '0'}
+                'display_time_private_highlight' : '0',
+                'display_errors' : 'on'}
 
     if w.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, "", ""):
         for (kw, v) in settings.items():
