@@ -147,19 +147,22 @@ def accept_connections(s):
         finally:
             conn.close()
         if data:
-            try:
-                mtype, urgency, icon, time, nick, chan, body = data.split('\n')
-                title = nick + " to " + chan
-                args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
-                #pprint(args)
-                subprocess.Popen(args)
+            handle_data(data)
 
-                sound="/usr/share/sounds/purple/receive.wav"
-                subprocess.call(["play", "-V0", "-q", sound])
-            except ValueError as e:
-                print e
-            except OSError as e:
-                print e
+def handle_data(data):
+    try:
+        mtype, urgency, icon, time, nick, chan, body = data.split('\n')
+        title = nick + " to " + chan
+        args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
+        #pprint(args)
+        subprocess.Popen(args)
+
+        sound="/usr/share/sounds/purple/receive.wav"
+        subprocess.call(["play", "-V0", "-q", sound])
+    except ValueError as e:
+        print e
+    except OSError as e:
+        print e
 
 def weechat_client(argv):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
