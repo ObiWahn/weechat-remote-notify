@@ -37,6 +37,21 @@
 # It is also possible to set which host pyrnotify shall connect to,
 # this is not recommended. Using a ssh port-forward is much safer
 # and doesn't require any ports but ssh to be open.
+#
+# Alternatively, you can create a new SSH connection (or run any other
+# arbitrary command) for every notification. This has the advantage of
+# not having to open up a TCP port (which can typically be accessed by
+# all users on the machine running weechat).
+#
+#   In weechat:
+#   /python load remote-notify.py
+#   and set the command to run:
+#   /set plugins.var.python.remote-notify.notify_command ssh client.example.org /path/to/weechat-remote-notify.py -
+#
+#   The /path/to/weechat-remote-notify.py is the path on the "client"
+#   machine. Note the "-" argument, which indicates that a single
+#   notification should be read from stdin, instead of the default
+#   behaviour of spawning a TCP server.
 
 try:
     import weechat as w
@@ -58,24 +73,36 @@ SCRIPT_LICENSE = "GPL3"
 SCRIPT_DESC    = "Send remote notifications over sockets"
 
 def run_notify(mtype,urgency,icon,time,nick,chan,message):
+    data  = str(mtype) + "\n"
+    data += str(urgency) + "\n"
+    data += str(icon) + "\n"
+    data += str(time) + "\n"    #time to display TODO
+    data += str(nick) + "\n"
+    data += str(chan) + "\n"
+    data += str(message)
+
+    transport = w.config_get_plugin('transport')
+    command = w.config_get_plugin('notify_command'),
     host = w.config_get_plugin('host')
+
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((host, int(w.config_get_plugin('port'))))
-        data  = str(mtype) + "\n"
-        data += str(urgency) + "\n"
-        data += str(icon) + "\n"
-        data += str(time) + "\n"    #time to display TODO
-        data += str(nick) + "\n"
-        data += str(chan) + "\n"
-        data += str(message)
-        s.send(str(data))
-        s.close()
+        if command:
+            p = subprocess.Popen(command, shell=True,
+                                 stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT)
+            (output, _) = p.communicate(data)
+            if p.returncode != 0:
+                raise Exception("Notify command failed with return code " + str(p.returncode) + "\r\n" + output)
+        else:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((host, int(w.config_get_plugin('port'))))
+            s.send(str(data))
+            s.close()
     except Exception as e:
-        pass
-        #TODO make error message optional - as ppl do not always connect from x
-        #and it spams the logs quite a bit
-        #w.prnt("", "Could not send notification: %s" % str(e))
+        if w.config_string_to_boolean(w.config_get_plugin("display_errors")):
+            w.prnt("", "Could not send notification: %s" % str(e))
+            w.prnt("", "To hide errors, run: /set plugins.var.python.remote-notify.display_errors off")
 
 def on_msg(*a):
     if len(a) == 8:
@@ -111,14 +138,16 @@ def on_msg(*a):
     return w.WEECHAT_RC_OK
 
 def weechat_script():
-    settings = {'host' : "localhost",
+    settings = {'notify_command' : "",
+                'host' : "localhost",
                 'port' : "4321",
                 'icon' : "utilities-terminal",
                 'pm-icon' : "emblem-favorite",
                 'urgency_default' : 'normal',
                 'display_time_default' : '10000',
                 'display_time_highlight' : '30000',
-                'display_time_private_highlight' : '0'}
+                'display_time_private_highlight' : '0',
+                'display_errors' : 'on'}
 
     if w.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE, SCRIPT_DESC, "", ""):
         for (kw, v) in settings.items():
@@ -136,34 +165,41 @@ def weechat_script():
 ## commandline.
 
 def accept_connections(s):
-    conn, addr = s.accept()
-    try:
-        data = ""
-        d = conn.recv(1024)
-        while d:
-            data += d
-            d = conn.recv(1024)
-    finally:
-        conn.close()
-    if data:
+    while True:
+        conn, addr = s.accept()
         try:
-            mtype, urgency, icon, time, nick, chan, body = data.split('\n')
-            title = nick + " to " + chan
-            args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
-            #pprint(args)
-            subprocess.Popen(args)
+            data = ""
+            d = conn.recv(1024)
+            while d:
+                data += d
+                d = conn.recv(1024)
+        finally:
+            conn.close()
+        if data:
+            handle_data(data)
 
-            sound="/usr/share/sounds/purple/receive.wav"
-            subprocess.call(["play", "-V0", "-q", sound])
-        except ValueError as e:
-            print e
-        except OSError as e:
-            print e
-    accept_connections(s)
+def handle_data(data):
+    try:
+        mtype, urgency, icon, time, nick, chan, body = data.split('\n')
+        title = nick + " to " + chan
+        args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
+        #pprint(args)
+        subprocess.Popen(args)
+
+        sound="/usr/share/sounds/purple/receive.wav"
+        subprocess.call(["play", "-V0", "-q", sound])
+    except ValueError as e:
+        print e
+    except OSError as e:
+        print e
 
 def weechat_client(argv):
+    if len(argv) > 1 and argv[1] == '-':
+        handle_data(sys.stdin.read())
+        return
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("localhost", int(argv[1] if len(sys.argv) > 1 else 4321)))
+    s.bind(("localhost", int(argv[1] if len(argv) > 1 else 4321)))
     s.listen(5)
     try:
         accept_connections(s)
