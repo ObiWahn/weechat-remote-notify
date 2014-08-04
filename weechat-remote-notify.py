@@ -136,30 +136,30 @@ def weechat_script():
 ## commandline.
 
 def accept_connections(s):
-    conn, addr = s.accept()
-    try:
-        data = ""
-        d = conn.recv(1024)
-        while d:
-            data += d
-            d = conn.recv(1024)
-    finally:
-        conn.close()
-    if data:
+    while True:
+        conn, addr = s.accept()
         try:
-            mtype, urgency, icon, time, nick, chan, body = data.split('\n')
-            title = nick + " to " + chan
-            args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
-            #pprint(args)
-            subprocess.Popen(args)
+            data = ""
+            d = conn.recv(1024)
+            while d:
+                data += d
+                d = conn.recv(1024)
+        finally:
+            conn.close()
+        if data:
+            try:
+                mtype, urgency, icon, time, nick, chan, body = data.split('\n')
+                title = nick + " to " + chan
+                args=["notify-send", "-u", urgency, "-t", time, "-c", "IRC", "-i", icon, title, body ]
+                #pprint(args)
+                subprocess.Popen(args)
 
-            sound="/usr/share/sounds/purple/receive.wav"
-            subprocess.call(["play", "-V0", "-q", sound])
-        except ValueError as e:
-            print e
-        except OSError as e:
-            print e
-    accept_connections(s)
+                sound="/usr/share/sounds/purple/receive.wav"
+                subprocess.call(["play", "-V0", "-q", sound])
+            except ValueError as e:
+                print e
+            except OSError as e:
+                print e
 
 def weechat_client(argv):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
