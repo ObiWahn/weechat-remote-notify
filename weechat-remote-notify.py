@@ -166,7 +166,7 @@ def handle_data(data):
 
 def weechat_client(argv):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("localhost", int(argv[1] if len(sys.argv) > 1 else 4321)))
+    s.bind(("localhost", int(argv[1] if len(argv) > 1 else 4321)))
     s.listen(5)
     try:
         accept_connections(s)
