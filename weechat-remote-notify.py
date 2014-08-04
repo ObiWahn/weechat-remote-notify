@@ -165,6 +165,10 @@ def handle_data(data):
         print e
 
 def weechat_client(argv):
+    if len(argv) > 1 and argv[1] == '-':
+        handle_data(sys.stdin.read())
+        return
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind(("localhost", int(argv[1] if len(argv) > 1 else 4321)))
     s.listen(5)
